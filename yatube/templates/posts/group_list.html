@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block header %}{{ group.title }}{% endblock %}
+{% load thumbnail %}
+{% block content %}
+{% load user_filters %}
+  <h1>{{ group.title }}</h1>
+  <p>{{ group.description|linebreaksbr }}</p>  
+  {% for post in page_obj %}
+    {% include 'includes/post.html' %}
+    {% if not forloop.last %}{% endif %}
+  {% endfor %}
+  {% include 'includes/paginator.html' %}
+{% endblock %}
