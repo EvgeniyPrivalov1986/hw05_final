@@ -35,7 +35,6 @@ class Post(models.Model):
         blank=True,
         null=True,
         help_text='Можете загрузить изображение',
-        related_name='posts'
     )
 
     class Meta:
