@@ -92,9 +92,3 @@ class PostCreateEditFormTests(TestCase):
             'posts:post_detail', args={self.post.id}
         ))
         self.assertEqual(self.post.comments.count(), 1)
-        comment_request = self.authorized_client.get(
-            reverse('posts:post_detail', args={self.post.id})
-        )
-        first_object = comment_request.context['comments'][0]
-        self.assertEqual(first_object.text, 'Текст комментария')
-        self.assertEqual(first_object.author, self.user)

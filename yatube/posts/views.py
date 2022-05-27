@@ -10,7 +10,8 @@ from .servises import get_paginator
 @cache_page(20)
 def index(request):
     """Выводит шаблон главной страницы"""
-    page_obj = get_paginator(request, Post.objects.all())
+    posts = Post.objects.select_related('group', 'author').all()
+    page_obj = get_paginator(request, posts)
     context = {
         'page_obj': page_obj,
     }
@@ -30,9 +31,9 @@ def group_posts(request, slug):
 def profile(request, username):
     author = get_object_or_404(User, username=username)
     page_obj = get_paginator(request, author.posts.all())
-    following = Follow.objects.filter(
-        user=request.user.id, author=author.id
-    ).all()
+    following = request.user.is_authenticated and Follow.objects.filter(
+        user=request.user, author=author
+    ).exists()
     context = {
         'author': author,
         'page_obj': page_obj,
@@ -53,7 +54,7 @@ def post_detail(request, post_id):
     return render(request, 'posts/post_detail.html', context)
 
 
-@ login_required
+@login_required
 def post_create(request):
     form = PostForm(
         request.POST or None,
@@ -71,7 +72,7 @@ def post_create(request):
     return render(request, 'posts/post_create.html', context)
 
 
-@ login_required
+@login_required
 def post_edit(request, post_id):
     post = Post.objects.get(id=post_id)
     if request.user != post.author:
@@ -117,11 +118,8 @@ def follow_index(request):
 @login_required
 def profile_follow(request, username):
     author = get_object_or_404(User, username=username)
-    follow_check = Follow.objects.filter(
-        user=request.user.id, author=author.id
-    ).count()
-    if follow_check == 0 and author.id != request.user.id:
-        Follow.objects.create(user=request.user, author=author)
+    if author != request.user:
+        Follow.objects.get_or_create(user=request.user, author=author)
     return redirect('posts:profile', username=username)
 
 
@@ -129,8 +127,8 @@ def profile_follow(request, username):
 def profile_unfollow(request, username):
     author = get_object_or_404(User, username=username)
     follow_check = Follow.objects.filter(
-        user=request.user.id, author=author.id
-    ).count()
+        user=request.user, author=author
+    ).exists()
     if follow_check == 1:
         Follow.objects.filter(user=request.user, author=author).delete()
     return redirect('posts:profile', username=username)

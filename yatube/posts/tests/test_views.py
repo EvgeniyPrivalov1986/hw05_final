@@ -4,7 +4,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django import forms
 
-from ..models import Group, Post, User
+from ..models import Comment, Group, Post, User
 from ..servises import PAGINATOR_QUANTITY
 
 POSTS_ON_SECOND_PAGE = 3
@@ -35,7 +35,7 @@ class PostPagesTests(TestCase):
             content_type='image/gif'
         )
         cls.post = Post.objects.create(
-            text='Рандомный текст',
+            text='Random_text',
             author=PostPagesTests.user,
             group=PostPagesTests.group,
             image=uploaded,
@@ -44,6 +44,11 @@ class PostPagesTests(TestCase):
             title='Фейк группа',
             slug='fake-slug',
             description='Описание фейк группы',
+        )
+        cls.comment = Comment.objects.create(
+            text='Comment_text',
+            author=PostPagesTests.user,
+            post=PostPagesTests.post,
         )
 
     def setUp(self):
@@ -150,6 +155,15 @@ class PostPagesTests(TestCase):
                 self.assertIsInstance(response.context['form'].fields['image'],
                                       forms.fields.ImageField)
 
+    def test_comments_show_correct_context(self):
+        """Комментарий отображается на странице поста"""
+        response = self.authorized_client.get(
+            reverse('posts:post_detail',
+                    args={self.post.id}))
+        post_object = response.context['comments'][0]
+        self.assertEqual(post_object.text, self.comment.text)
+        self.assertEqual(post_object.author, self.user)
+
 
 class PaginatorViewsTest(TestCase):
     @classmethod
@@ -211,20 +225,20 @@ class CacheIndexPageTest(TestCase):
         )
 
     def setUp(self):
-        self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
+        self.guest_client = Client()
+        self.guest_client.force_login(self.user)
 
     def test_cache(self):
         """Список постов на главной странице храниться в кеше"""
-        content = self.authorized_client.get(reverse('posts:index')).content
+        content = self.guest_client.get(reverse('posts:index')).content
         Post.objects.create(
             text='Пост №1',
             author=self.user,
         )
-        content_1 = self.authorized_client.get(reverse('posts:index')).content
+        content_1 = self.guest_client.get(reverse('posts:index')).content
         self.assertEqual(content, content_1)
         cache.clear()
-        content_2 = self.authorized_client.get(reverse('posts:index')).content
+        content_2 = self.guest_client.get(reverse('posts:index')).content
         self.assertNotEqual(content_1, content_2)
 
 
@@ -264,6 +278,17 @@ class FollowViewsTest(TestCase):
         self.assertEqual(page_object.author, self.author)
         self.assertEqual(page_object.text, self.post.text)
         self.assertEqual(page_object.pub_date, self.post.pub_date)
+
+    def test_unfollow_page_context(self):
+        """Авторизированный пользователь может отписаться от автора"""
+        response = self.follower_client.get(reverse('posts:follow_index'))
+        page_object = response.context.get('page_obj').object_list
+        self.assertEqual((len(page_object)), 0)
+        self.follower_client.get(
+            reverse('posts:profile_follow', args={self.author.username})
+        )
+        response = self.follower_client.get(reverse('posts:follow_index'))
+        self.assertEqual((len(response.context['page_obj'])), 1)
         self.follower_client.get(
             reverse('posts:profile_unfollow', args={self.author.username})
         )

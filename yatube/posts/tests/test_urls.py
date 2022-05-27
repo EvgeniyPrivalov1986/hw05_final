@@ -37,6 +37,7 @@ class GroupURLTests(TestCase):
             f'/posts/{self.post.id}/': HTTPStatus.OK,
             '/create/': HTTPStatus.FOUND,
             f'/posts/{self.post.id}/edit/': HTTPStatus.FOUND,
+            '/follow/': HTTPStatus.FOUND,
         }
         for url, response_code in response_urls_code.items():
             with self.subTest(url=url):
@@ -53,6 +54,7 @@ class GroupURLTests(TestCase):
             f'/posts/{self.post.id}/': HTTPStatus.OK,
             '/create/': HTTPStatus.OK,
             f'/posts/{self.post.id}/edit/': HTTPStatus.OK,
+            '/follow/': HTTPStatus.OK,
         }
         for url, response_code in response_urls_code.items():
             with self.subTest(url=url):
@@ -69,6 +71,7 @@ class GroupURLTests(TestCase):
             f'/posts/{self.post.id}/': 'posts/post_detail.html',
             '/create/': 'posts/post_create.html',
             f'/posts/{self.post.id}/edit/': 'posts/post_create.html',
+            '/follow/': 'posts/follow.html',
         }
         for address, template in templates_url_names.items():
             with self.subTest(address=address):

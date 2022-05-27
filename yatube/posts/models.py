@@ -1,5 +1,4 @@
 from django.db import models
-
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -41,7 +40,7 @@ class Post(models.Model):
         ordering = ['-pub_date']
 
     def __str__(self):
-        return self.text
+        return self.text[:15]
 
 
 class Comment(models.Model):
@@ -68,7 +67,7 @@ class Comment(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Комментарий'
+        verbose_name = 'Comment'
 
 
 class Follow(models.Model):
@@ -84,3 +83,10 @@ class Follow(models.Model):
         related_name='following',
         verbose_name='Отслеживается',
     )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'author'],
+                name='unique_subs')
+        ]
