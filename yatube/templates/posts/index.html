@@ -4,9 +4,9 @@
 {% block content %}
   <h1>Последние обновления на сайте</h1>
   <br>
-  {% include 'posts/includes/switcher.html' %}  
+  {% include 'posts/includes/switcher.html' with index=True %}  
   {% for post in page_obj %}
-    {% include 'includes/post.html' with show_group_link=True %}
+    {% include 'posts/includes/post.html' with show_group_link=True %}
   {% endfor %}
-  {% include 'includes/paginator.html' %}
+  {% include 'posts/includes/paginator.html' %}
 {% endblock %}

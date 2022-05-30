@@ -22,7 +22,7 @@
    {% endif %}
 </div>  
   {% for post in page_obj %}
-    {% include 'includes/post.html' with show_group_link=True %}
+    {% include 'posts/includes/post.html' with show_group_link=True %}
   {% endfor %}
-  {% include 'includes/paginator.html' %}
+  {% include 'posts/includes/paginator.html' %}
 {% endblock %}

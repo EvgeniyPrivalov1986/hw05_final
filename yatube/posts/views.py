@@ -129,6 +129,6 @@ def profile_unfollow(request, username):
     follow_check = Follow.objects.filter(
         user=request.user, author=author
     ).exists()
-    if follow_check == 1:
+    if follow_check:
         Follow.objects.filter(user=request.user, author=author).delete()
     return redirect('posts:profile', username=username)

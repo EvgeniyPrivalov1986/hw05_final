@@ -4,7 +4,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django import forms
 
-from ..models import Comment, Group, Post, User
+from ..models import Comment, Group, Post, User, Follow
 from ..servises import PAGINATOR_QUANTITY
 
 POSTS_ON_SECOND_PAGE = 3
@@ -281,9 +281,10 @@ class FollowViewsTest(TestCase):
 
     def test_unfollow_page_context(self):
         """Авторизированный пользователь может отписаться от автора"""
-        response = self.follower_client.get(reverse('posts:follow_index'))
-        page_object = response.context.get('page_obj').object_list
-        self.assertEqual((len(page_object)), 0)
+        Follow.objects.create(
+            user=self.follower,
+            author=self.author,
+        )
         self.follower_client.get(
             reverse('posts:profile_follow', args={self.author.username})
         )
@@ -301,6 +302,10 @@ class FollowViewsTest(TestCase):
         response = self.author_client.get(reverse('posts:follow_index'))
         self.assertEqual(
             (len(response.context.get('page_obj').object_list)), 0
+        )
+        Follow.objects.create(
+            user=self.follower,
+            author=self.author,
         )
         self.author_client.get(
             reverse('posts:profile_follow', args={self.author.username})
