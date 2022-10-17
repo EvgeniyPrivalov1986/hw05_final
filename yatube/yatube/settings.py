@@ -35,8 +35,6 @@ ALLOWED_HOSTS = [
 
 # Application definition
 
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-
 INSTALLED_APPS = [
     'about.apps.AboutConfig',
     'core.apps.CoreConfig',
@@ -151,6 +149,8 @@ PASSWORD_CHANGE_DONE_URL = 'users:password_change_done'
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
 
